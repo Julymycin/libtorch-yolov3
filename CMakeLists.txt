@@ -10,4 +10,4 @@ aux_source_directory(. DIR_SRCS)
 
 add_executable(yolo-app ${DIR_SRCS})
 target_link_libraries(yolo-app "${TORCH_LIBRARIES}" "${OpenCV_LIBS}")
-set_property(TARGET yolo-app PROPERTY CXX_STANDARD 11)
+set_property(TARGET yolo-app PROPERTY CXX_STANDARD 14)

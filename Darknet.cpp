@@ -136,14 +136,14 @@ torch::nn::Conv2dOptions conv_options(int64_t in_planes, int64_t out_planes, int
     conv_options.stride(stride);
     conv_options.padding(padding);
     conv_options.groups(groups);
-    conv_options.with_bias(with_bias);
+    conv_options.bias(with_bias);
     return conv_options;
 }
 
 torch::nn::BatchNormOptions bn_options(int64_t features){
     torch::nn::BatchNormOptions bn_options = torch::nn::BatchNormOptions(features);
     bn_options.affine(true);
-    bn_options.stateful(true);
+    bn_options.track_running_stats(true);
     return bn_options;
 }
 
@@ -377,7 +377,7 @@ void Darknet::create_modules()
 
 			if (batch_normalize > 0)
 			{
-				torch::nn::BatchNorm bn = torch::nn::BatchNorm(bn_options(filters));
+				torch::nn::BatchNorm2d bn = torch::nn::BatchNorm2d(bn_options(filters));
                 module->push_back(bn);
 			}
 
@@ -522,8 +522,7 @@ void Darknet::load_weights(const char *weight_file)
     fs.close();
 
     at::TensorOptions options= torch::TensorOptions()
-        .dtype(torch::kFloat32)
-        .is_variable(true);
+        .dtype(torch::kFloat32);
     at::Tensor weights = torch::from_blob(weights_src, {length/4});
 
 	for (int i = 0; i < module_list.size(); i++)
@@ -547,7 +546,7 @@ void Darknet::load_weights(const char *weight_file)
 			// second module
 			auto bn_module = seq_module.ptr()->ptr(1);
 
-			torch::nn::BatchNormImpl *bn_imp = dynamic_cast<torch::nn::BatchNormImpl *>(bn_module.get());
+			torch::nn::BatchNorm2dImpl *bn_imp = dynamic_cast<torch::nn::BatchNorm2dImpl *>(bn_module.get());
 
 			int num_bn_biases = bn_imp->bias.numel();
 
